@@ -4,21 +4,36 @@ use crossterm::style::{Print, SetForegroundColor};
 use crossterm::terminal::{disable_raw_mode, enable_raw_mode, Clear, ClearType};
 use std::io::{stdout, Stdout};
 
-const LOTERIES: [&str; 2] = ["Power Ball", "Mega Millions"];
-const EXIT_CHAR: char = 'q';
-
-pub struct Menu {
-    selected_item_index: usize,
-    stdout_instance: Stdout,
+#[derive(Clone, Copy)]
+pub enum Lottery<'a> {
+    PowerBall(&'a str),
+    MegaMillions(&'a str),
 }
 
-impl Menu {
-    pub fn new() -> Menu {
+pub enum MenuEvent<'a> {
+    MenuItemSelected(Lottery<'a>),
+    Shutdown,
+}
+
+const EXIT_CHAR: char = 'q';
+
+pub struct Menu<'a> {
+    selected_item_index: usize,
+    stdout_instance: Stdout,
+    lotteries: Vec<Lottery<'a>>,
+}
+
+impl<'a> Menu<'a> {
+    pub fn new() -> Menu<'a> {
         enable_raw_mode().unwrap();
 
         Menu {
             selected_item_index: 0,
             stdout_instance: stdout(),
+            lotteries: vec![
+                Lottery::PowerBall("Power Ball"),
+                Lottery::MegaMillions("Mega Millions"),
+            ],
         }
     }
 
@@ -31,25 +46,32 @@ impl Menu {
         )
         .unwrap();
 
-        LOTERIES.iter().enumerate().for_each(|(index, menu_item)| {
-            let color = if self.selected_item_index == index {
-                crossterm::style::Color::Green
-            } else {
-                crossterm::style::Color::Grey
-            };
+        self.lotteries
+            .iter()
+            .enumerate()
+            .for_each(|(index, menu_item)| {
+                let color = if self.selected_item_index == index {
+                    crossterm::style::Color::Green
+                } else {
+                    crossterm::style::Color::Grey
+                };
 
-            Print(menu_item);
-            execute!(
-                self.stdout_instance,
-                cursor::MoveTo(40, 20 + index as u16),
-                SetForegroundColor(color),
-                Print(menu_item),
-            )
-            .unwrap();
-        });
+                let lottery_name = match *menu_item {
+                    Lottery::MegaMillions(name) => name,
+                    Lottery::PowerBall(name) => name,
+                };
+
+                execute!(
+                    self.stdout_instance,
+                    cursor::MoveTo(40, 20 + index as u16),
+                    SetForegroundColor(color),
+                    Print(lottery_name),
+                )
+                .unwrap();
+            });
     }
 
-    pub fn select(&mut self) {
+    pub fn select(&mut self) -> MenuEvent {
         loop {
             self.draw();
 
@@ -60,7 +82,7 @@ impl Menu {
                     ..
                 }) => {
                     if self.selected_item_index == 0 {
-                        self.selected_item_index = LOTERIES.len() - 1;
+                        self.selected_item_index = self.lotteries.len() - 1;
                     } else {
                         self.selected_item_index = self.selected_item_index - 1
                     }
@@ -71,7 +93,7 @@ impl Menu {
                     modifiers: KeyModifiers::NONE,
                     ..
                 }) => {
-                    if self.selected_item_index == LOTERIES.len() - 1 {
+                    if self.selected_item_index == self.lotteries.len() - 1 {
                         self.selected_item_index = 0;
                     } else {
                         self.selected_item_index = self.selected_item_index + 1;
@@ -79,10 +101,16 @@ impl Menu {
                 }
 
                 Event::Key(KeyEvent {
+                    code: KeyCode::Enter,
+                    modifiers: KeyModifiers::NONE,
+                    ..
+                }) => return MenuEvent::MenuItemSelected(self.lotteries[self.selected_item_index]),
+
+                Event::Key(KeyEvent {
                     code: KeyCode::Char(EXIT_CHAR),
                     modifiers: KeyModifiers::NONE,
                     ..
-                }) => break,
+                }) => return MenuEvent::Shutdown,
 
                 _ => (),
             }
@@ -90,7 +118,7 @@ impl Menu {
     }
 }
 
-impl Drop for Menu {
+impl<'a> Drop for Menu<'a> {
     fn drop(&mut self) {
         execute!(self.stdout_instance, cursor::Show).unwrap();
 
