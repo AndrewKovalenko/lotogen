@@ -1,14 +1,9 @@
+use super::lotteries::Lottery;
 use crossterm::cursor;
 use crossterm::event::{read, Event, KeyCode, KeyEvent, KeyModifiers};
 use crossterm::style::{Print, SetForegroundColor};
 use crossterm::terminal::{disable_raw_mode, enable_raw_mode, Clear, ClearType};
 use std::io::{stdout, Stdout};
-
-#[derive(Clone, Copy)]
-pub enum Lottery<'a> {
-    PowerBall(&'a str),
-    MegaMillions(&'a str),
-}
 
 pub enum MenuEvent<'a> {
     MenuItemSelected(Lottery<'a>),
