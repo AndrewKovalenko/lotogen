@@ -5,9 +5,11 @@ pub mod application {
     mod generator;
     mod lotteries;
     mod menu;
+    mod view;
 
-    use generator::generate_lottery_ticket;
+    use generator::{generate_lottery_ticket, LotteryTicket};
     use menu::MenuEvent;
+    use view::show_lottery_ticket;
 
     pub fn run() {
         let mut menu = menu::Menu::new();
@@ -15,7 +17,9 @@ pub mod application {
         loop {
             match menu.select() {
                 MenuEvent::MenuItemSelected(lotery) => {
-                    let generator = generate_lottery_ticket(&lotery);
+                    let lottery_ticket: LotteryTicket = generate_lottery_ticket(&lotery);
+
+                    show_lottery_ticket(&lottery_ticket);
                 }
                 MenuEvent::Shutdown => break,
             }

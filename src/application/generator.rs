@@ -12,8 +12,8 @@ struct GeneratorSettingsForLottery {
 }
 
 pub struct LotteryTicket {
-    main_field: Vec<i8>,
-    separate_number: Vec<i8>,
+    pub main_field: Vec<i8>,
+    pub separate_number: Vec<i8>,
 }
 
 fn get_generator_settings(lottery: &Lottery) -> GeneratorSettingsForLottery {
@@ -38,7 +38,7 @@ fn get_generator_settings(lottery: &Lottery) -> GeneratorSettingsForLottery {
 }
 
 fn generate_ticket_field(range_min: u8, rannge_max: u8, count: u8) -> Vec<i8> {
-    let mut main_field_numbers: Vec<_> = (range_min..=rannge_max)
+    let mut main_field_numbers: Vec<i8> = (range_min..=rannge_max)
         .into_iter()
         .map(|n| n as i8)
         .collect();
