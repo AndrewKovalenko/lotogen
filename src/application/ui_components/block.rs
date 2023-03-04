@@ -3,7 +3,8 @@ use std::io::Stdout;
 use tui::{
     backend::CrosstermBackend,
     layout::Rect,
-    widgets::{Block as TuiBlock, Borders},
+    style::{Color, Style},
+    widgets::{Block as TuiBlock, BorderType, Borders},
     Terminal,
 };
 
@@ -24,12 +25,15 @@ impl<'a> Block<'a> {
     ) {
         self.terminal
             .draw(|frame| {
-                let block = if let Some(title_string) = title {
-                    TuiBlock::default()
-                        .title(title_string)
-                        .borders(Borders::ALL)
+                let mut block = TuiBlock::default()
+                    .borders(Borders::ALL)
+                    .border_style(Style::default().fg(Color::Yellow))
+                    .border_type(BorderType::Double);
+
+                block = if let Some(title_string) = title {
+                    block.title(title_string)
                 } else {
-                    TuiBlock::default().borders(Borders::ALL)
+                    block
                 };
 
                 frame.render_widget(block, dimensions);
