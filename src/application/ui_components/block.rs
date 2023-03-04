@@ -31,7 +31,9 @@ impl<'a> Block<'a> {
                     .border_type(BorderType::Double);
 
                 block = if let Some(title_string) = title {
-                    block.title(title_string)
+                    block
+                        .title(title_string)
+                        .title_alignment(tui::layout::Alignment::Center)
                 } else {
                     block
                 };

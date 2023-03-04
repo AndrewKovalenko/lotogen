@@ -15,7 +15,7 @@ pub mod application {
     use generator::{generate_lottery_ticket, LotteryTicket};
     use menu::MenuEvent;
 
-    use self::view::oop_show;
+    use self::view::show_ticket;
 
     pub fn run() {
         let mut menu = menu::Menu::new();
@@ -25,7 +25,7 @@ pub mod application {
                 MenuEvent::MenuItemSelected(lotery) => {
                     let lottery_ticket: LotteryTicket = generate_lottery_ticket(&lotery);
 
-                    oop_show(&lottery_ticket);
+                    show_ticket(&lottery_ticket, 2);
                 }
                 MenuEvent::Shutdown => break,
             }

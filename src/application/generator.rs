@@ -1,6 +1,6 @@
 use rand::Rng;
 
-use super::lotteries::Lottery;
+use super::lotteries::{Lottery, Namable};
 
 struct GeneratorSettingsForLottery {
     main_field_min_number: u8,
@@ -12,6 +12,7 @@ struct GeneratorSettingsForLottery {
 }
 
 pub struct LotteryTicket {
+    pub lottery_name: String,
     pub main_field: Vec<i8>,
     pub separate_number: Vec<i8>,
 }
@@ -60,6 +61,13 @@ fn generate_ticket_field(range_min: u8, rannge_max: u8, count: u8) -> Vec<i8> {
     return main_field_numbers;
 }
 
+fn get_lottery_name<'a, T>(lottery: &'a T) -> &'a str
+where
+    T: Namable,
+{
+    return lottery.get_name();
+}
+
 pub fn generate_lottery_ticket(lottery: &Lottery) -> LotteryTicket {
     let generator_settings = get_generator_settings(lottery);
 
@@ -75,8 +83,11 @@ pub fn generate_lottery_ticket(lottery: &Lottery) -> LotteryTicket {
         1,
     );
 
-    LotteryTicket {
+    let lottery_name = get_lottery_name(lottery).to_owned();
+
+    return LotteryTicket {
+        lottery_name: lottery_name,
         main_field: main_field_numbers,
         separate_number: separate_number_field,
-    }
+    };
 }

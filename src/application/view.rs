@@ -2,24 +2,19 @@ use super::ui_components::block::Block;
 use super::ui_components::screen::Screen;
 use super::LotteryTicket;
 
+use crossterm::cursor;
 use crossterm::event::read;
-use crossterm::{cursor, terminal};
 use crossterm::{
-    event::DisableMouseCapture,
     execute,
     style::{Attribute, Print, SetAttribute, SetForegroundColor},
-    terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
-use std::io::{self, Stdout};
+use std::io::Stdout;
 use tui::layout::Rect;
-use tui::{
-    backend::CrosstermBackend,
-    widgets::{Block as TuiBlock, Borders},
-    Terminal,
-};
+use tui::{backend::CrosstermBackend, Terminal};
 
 const NUMBER_OF_GAMES: u8 = 5;
 const ONE_GAME_HEIGHT: u8 = 9;
+const TICKET_WIDTH: u8 = 65;
 
 fn print_field(
     nums: &Vec<i8>,
@@ -54,29 +49,42 @@ fn print_field(
     });
 }
 
-pub fn oop_show(lottery_ticket: &LotteryTicket) {
+pub fn show_ticket<'a>(lottery_ticket: &'a LotteryTicket, number_of_tickets: u8) {
     let mut screen = Screen::new().unwrap();
 
     screen.show(&|terminal| {
-        let mut ticket = Block::new(terminal);
-        let ticket_dimensions = Rect::new(9, 1, 65, (NUMBER_OF_GAMES * ONE_GAME_HEIGHT + 2) as u16);
-        ticket.show_block(ticket_dimensions, &|terminal| {
-            for game in 0..NUMBER_OF_GAMES {
-                let vertical_offset = game * ONE_GAME_HEIGHT;
-                print_field(
-                    &lottery_ticket.main_field,
-                    terminal,
-                    3 + vertical_offset as u16,
-                    12,
-                );
-                print_field(
-                    &lottery_ticket.separate_number,
-                    terminal,
-                    8 + vertical_offset as u16,
-                    12,
-                );
-            }
-        });
+        for ticket_number in 1..=number_of_tickets {
+            let mut ticket = Block::new(terminal);
+            let left_corner_position = (ticket_number - 1) * TICKET_WIDTH;
+            let ticket_dimensions = Rect::new(
+                9 + left_corner_position as u16,
+                1,
+                65,
+                (NUMBER_OF_GAMES * ONE_GAME_HEIGHT + 2) as u16,
+            );
+            let ticket_title = format!(
+                " {} Ticket #{} ",
+                lottery_ticket.lottery_name, ticket_number
+            );
+
+            ticket.show_block_with_title(ticket_dimensions, ticket_title.as_str(), &|terminal| {
+                for game in 0..NUMBER_OF_GAMES {
+                    let vertical_offset = game * ONE_GAME_HEIGHT;
+                    print_field(
+                        &lottery_ticket.main_field,
+                        terminal,
+                        3 + vertical_offset as u16,
+                        12 + left_corner_position as u16,
+                    );
+                    print_field(
+                        &lottery_ticket.separate_number,
+                        terminal,
+                        8 + vertical_offset as u16,
+                        12 + left_corner_position as u16,
+                    );
+                }
+            });
+        }
 
         read().unwrap();
     });
