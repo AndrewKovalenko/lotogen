@@ -1,3 +1,5 @@
+use super::ui_components::block::Block;
+use super::ui_components::screen::Screen;
 use super::LotteryTicket;
 
 use crossterm::event::read;
@@ -9,13 +11,19 @@ use crossterm::{
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
 use std::io::{self, Stdout};
+use tui::layout::Rect;
 use tui::{
     backend::CrosstermBackend,
-    widgets::{Block, Borders},
+    widgets::{Block as TuiBlock, Borders},
     Terminal,
 };
 
-fn print_field(nums: &Vec<i8>, terminal: &mut Terminal<CrosstermBackend<Stdout>>, start_row: u16) {
+fn print_field(
+    nums: &Vec<i8>,
+    terminal: &mut Terminal<CrosstermBackend<Stdout>>,
+    start_row: u16,
+    start_column: u16,
+) {
     let mut row = 0;
     let mut column = 0;
     nums.iter().for_each(|n| {
@@ -27,7 +35,7 @@ fn print_field(nums: &Vec<i8>, terminal: &mut Terminal<CrosstermBackend<Stdout>>
 
         execute!(
             terminal.backend_mut(),
-            cursor::MoveTo(20 + (3 * column) as u16, start_row + row),
+            cursor::MoveTo(start_column + (3 * column) as u16, start_row + row),
             SetForegroundColor(color),
             SetAttribute(attr),
             Print(n.abs()),
@@ -43,33 +51,17 @@ fn print_field(nums: &Vec<i8>, terminal: &mut Terminal<CrosstermBackend<Stdout>>
     });
 }
 
-pub fn show_lottery_ticket(lottery_ticket: &LotteryTicket) {
-    enable_raw_mode().unwrap();
-    let mut stdout = io::stdout();
-    execute!(stdout, EnterAlternateScreen).unwrap();
-    let backend = CrosstermBackend::new(stdout);
-    let mut terminal = Terminal::new(backend).unwrap();
+pub fn oop_show(lottery_ticket: &LotteryTicket) {
+    let mut screen = Screen::new().unwrap();
 
-    terminal
-        .draw(|f| {
-            let size = f.size();
-            let block = Block::default().title("Block").borders(Borders::ALL);
-            f.render_widget(block, size);
-        })
-        .unwrap();
+    screen.show(&|terminal| {
+        let mut ticket = Block::new(terminal);
+        let ticket_dimensions = Rect::new(10, 1, 33, 13);
+        ticket.show_block(ticket_dimensions, &|terminal| {
+            print_field(&lottery_ticket.main_field, terminal, 2, 12);
+            print_field(&lottery_ticket.separate_number, terminal, 10, 12);
+        });
 
-    print_field(&lottery_ticket.main_field, &mut terminal, 20);
-    print_field(&lottery_ticket.separate_number, &mut terminal, 28);
-
-    read().unwrap();
-
-    // restore terminal
-    disable_raw_mode().unwrap();
-    execute!(
-        terminal.backend_mut(),
-        LeaveAlternateScreen,
-        DisableMouseCapture
-    )
-    .unwrap();
-    terminal.show_cursor().unwrap();
+        read().unwrap();
+    });
 }

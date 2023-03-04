@@ -45,7 +45,7 @@ fn generate_ticket_field(range_min: u8, rannge_max: u8, count: u8) -> Vec<i8> {
 
     let mut numbers_left = count;
     loop {
-        let wining_number = rand::thread_rng().gen_range(range_min..=rannge_max) as usize;
+        let wining_number = rand::thread_rng().gen_range(range_min..rannge_max) as usize;
 
         if main_field_numbers[wining_number] > 0 {
             main_field_numbers[wining_number] = (main_field_numbers[wining_number] * -1) as i8;

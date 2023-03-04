@@ -7,7 +7,7 @@ use tui::{
     Terminal,
 };
 
-struct Block<'a> {
+pub struct Block<'a> {
     terminal: &'a mut Terminal<CrosstermBackend<Stdout>>,
 }
 
