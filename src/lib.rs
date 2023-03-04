@@ -7,6 +7,11 @@ pub mod application {
     mod menu;
     mod view;
 
+    mod ui_components {
+        pub mod block;
+        pub mod screen;
+    }
+
     use generator::{generate_lottery_ticket, LotteryTicket};
     use menu::MenuEvent;
     use view::show_lottery_ticket;
