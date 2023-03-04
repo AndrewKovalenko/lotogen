@@ -14,7 +14,6 @@ pub mod application {
 
     use generator::{generate_lottery_ticket, LotteryTicket};
     use menu::MenuEvent;
-    use view::show_lottery_ticket;
 
     use self::view::oop_show;
 
