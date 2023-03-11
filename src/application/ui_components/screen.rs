@@ -16,15 +16,17 @@ impl Screen {
         let mut stdout = io::stdout();
         execute!(stdout, EnterAlternateScreen, EnableMouseCapture)?;
         let backend = CrosstermBackend::new(stdout);
-        let mut terminal = Terminal::new(backend)?;
+        let terminal = Terminal::new(backend)?;
 
         return Ok(Self { terminal });
     }
 
     pub fn show(&mut self, render: &dyn Fn(&mut Frame<CrosstermBackend<Stdout>>)) {
-        self.terminal.draw(|frame| {
-            render(frame);
-        });
+        self.terminal
+            .draw(|frame| {
+                render(frame);
+            })
+            .unwrap();
     }
 }
 
