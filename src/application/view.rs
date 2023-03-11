@@ -5,20 +5,20 @@ use super::LotteryTicket;
 use crossterm::event::read;
 use tui::layout::Rect;
 use tui::style::Style;
-use tui::widgets::{Block as TuiBlock, Cell};
+use tui::widgets::{Block as TuiBlock, Cell, Row, Table};
 
 const NUMBER_OF_GAMES: u8 = 5;
 const ONE_GAME_HEIGHT: u8 = 9;
 const TICKET_WIDTH: u8 = 65;
 
-fn print_field(nums: &Vec<i8>, block: TuiBlock, start_row: u16, start_column: u16) {
+fn print_field(nums: &Vec<i8>) {
     let mut row = 0;
     let mut column = 0;
-    let spans = nums.iter().fold(Vec::<Vec<Cell>>::new(), |mut rows, n| {
+    let cells = nums.iter().fold(Vec::<Vec<Cell>>::new(), |mut rows, n| {
         let style = if *n < 0 {
             Style::default().fg(tui::style::Color::Green)
         } else {
-            Style::default().fg(tui::style::Color::Green)
+            Style::default().fg(tui::style::Color::Gray)
         };
 
         let cell = Cell::from(n.abs().to_string()).style(style);
@@ -27,12 +27,21 @@ fn print_field(nums: &Vec<i8>, block: TuiBlock, start_row: u16, start_column: u1
             let new_row = vec![cell];
             rows.push(new_row);
         } else {
-            let current_row = rows.last().unwrap();
+            let current_row = rows.last_mut().unwrap();
             current_row.push(cell);
         }
 
         return rows;
     });
+
+    let table_rows: Vec<Row> = cells
+        .iter()
+        .map(|row_vector| Row::new(row_vector.clone()))
+        .collect();
+
+    Table::new(table_rows)
+        .column_spacing(1)
+        .block(TuiBlock::default());
 
     // if n % 20 == 0 {
     //     row = row + 1;
@@ -70,19 +79,8 @@ pub fn show_ticket<'a>(lottery_ticket: &'a LotteryTicket, number_of_tickets: u8)
 
             ticket.show_block_with_title(ticket_dimensions, ticket_title.as_str(), &|frame| {
                 for game in 0..NUMBER_OF_GAMES {
-                    let vertical_offset = game * ONE_GAME_HEIGHT;
-                    print_field(
-                        &lottery_ticket.main_field,
-                        frame,
-                        3 + vertical_offset as u16,
-                        12 + left_corner_position as u16,
-                    );
-                    print_field(
-                        &lottery_ticket.separate_number,
-                        frame,
-                        8 + vertical_offset as u16,
-                        12 + left_corner_position as u16,
-                    );
+                    print_field(&lottery_ticket.main_field);
+                    print_field(&lottery_ticket.separate_number);
                 }
             });
         }

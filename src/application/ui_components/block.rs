@@ -14,8 +14,8 @@ pub struct Block<'a> {
 }
 
 impl<'a> Block<'a> {
-    pub fn new(frame: &mut Frame<CrosstermBackend<Stdout>>) -> Block<'a> {
-        let mut block = TuiBlock::default()
+    pub fn new(frame: &mut Frame<'a, CrosstermBackend<Stdout>>) -> Block<'a> {
+        let block = TuiBlock::default()
             .borders(Borders::ALL)
             .border_style(Style::default().fg(Color::Yellow))
             .border_type(BorderType::Double);
