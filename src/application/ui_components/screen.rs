@@ -1,15 +1,10 @@
 use crossterm::{
-    event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode},
+    event::{DisableMouseCapture, EnableMouseCapture},
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
 use std::io::{self, Stdout};
-use tui::{
-    backend::CrosstermBackend,
-    layout::{Constraint, Direction, Layout},
-    widgets::{Block, Borders, Widget},
-    Terminal,
-};
+use tui::{backend::CrosstermBackend, Frame, Terminal};
 
 pub struct Screen {
     terminal: Terminal<CrosstermBackend<Stdout>>,
@@ -26,8 +21,13 @@ impl Screen {
         return Ok(Self { terminal });
     }
 
-    pub fn show(&mut self, render: &dyn Fn(&mut Terminal<CrosstermBackend<Stdout>>)) {
-        render(&mut self.terminal);
+    pub fn show(
+        &mut self,
+        render: &dyn Fn(&Frame<CrosstermBackend<Stdout>>, &mut CrosstermBackend<Stdout>),
+    ) {
+        self.terminal.draw(|frame| {
+            render(frame, &mut self.terminal.backend_mut());
+        });
     }
 }
 
