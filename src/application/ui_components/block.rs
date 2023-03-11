@@ -10,42 +10,36 @@ use tui::{
 
 pub struct Block<'a> {
     frame: &'a mut Frame<'a, CrosstermBackend<Stdout>>,
+    block: TuiBlock<'a>,
 }
 
 impl<'a> Block<'a> {
     pub fn new(frame: &mut Frame<CrosstermBackend<Stdout>>) -> Block<'a> {
-        return Block { frame };
+        let mut block = TuiBlock::default()
+            .borders(Borders::ALL)
+            .border_style(Style::default().fg(Color::Yellow))
+            .border_type(BorderType::Double);
+
+        return Block { frame, block };
     }
 
     fn internal_render(
         &mut self,
         dimensions: Rect,
         title: Option<&str>,
-        render: &dyn Fn(&mut Frame<CrosstermBackend<Stdout>>),
+        render: &dyn Fn(TuiBlock),
     ) {
-        let mut block = TuiBlock::default()
-            .borders(Borders::ALL)
-            .border_style(Style::default().fg(Color::Yellow))
-            .border_type(BorderType::Double);
-
-        block = if let Some(title_string) = title {
-            block
+        if let Some(title_string) = title {
+            self.block
                 .title(title_string)
-                .title_alignment(tui::layout::Alignment::Center)
-        } else {
-            block
-        };
+                .title_alignment(tui::layout::Alignment::Center);
+        }
 
-        self.frame.render_widget(block, dimensions);
-
-        render(self.frame);
+        self.frame.render_widget(self.block, dimensions);
+        render(self.block);
     }
 
-    pub fn show_block(
-        &mut self,
-        dimensions: Rect,
-        render: &dyn Fn(&mut Frame<CrosstermBackend<Stdout>>),
-    ) {
+    pub fn show_block(&mut self, dimensions: Rect, render: &dyn Fn(TuiBlock)) {
         self.internal_render(dimensions, None, render)
     }
 
@@ -53,7 +47,7 @@ impl<'a> Block<'a> {
         &mut self,
         dimensions: Rect,
         title: &str,
-        render: &dyn Fn(&mut Frame<CrosstermBackend<Stdout>>),
+        render: &dyn Fn(TuiBlock),
     ) {
         self.internal_render(dimensions, Some(title), render)
     }

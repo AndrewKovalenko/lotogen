@@ -21,12 +21,9 @@ impl Screen {
         return Ok(Self { terminal });
     }
 
-    pub fn show(
-        &mut self,
-        render: &dyn Fn(&Frame<CrosstermBackend<Stdout>>, &mut CrosstermBackend<Stdout>),
-    ) {
+    pub fn show(&mut self, render: &dyn Fn(&mut Frame<CrosstermBackend<Stdout>>)) {
         self.terminal.draw(|frame| {
-            render(frame, &mut self.terminal.backend_mut());
+            render(frame);
         });
     }
 }
