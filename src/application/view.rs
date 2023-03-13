@@ -1,4 +1,3 @@
-use super::ui_components::block::Block;
 use super::ui_components::screen::Screen;
 use super::LotteryTicket;
 
@@ -9,7 +8,6 @@ use crossterm::{
     style::{Attribute, Print, SetAttribute, SetForegroundColor},
 };
 use std::io::Stdout;
-use tui::layout::Rect;
 use tui::{backend::CrosstermBackend, Terminal};
 
 const NUMBER_OF_GAMES: u8 = 5;
@@ -54,36 +52,23 @@ pub fn show_ticket<'a>(lottery_ticket: &'a LotteryTicket, number_of_tickets: u8)
 
     screen.show(&|terminal| {
         for ticket_number in 1..=number_of_tickets {
-            let mut ticket = Block::new(terminal);
             let left_corner_position = (ticket_number - 1) * TICKET_WIDTH;
-            let ticket_dimensions = Rect::new(
-                9 + left_corner_position as u16,
-                1,
-                65,
-                (NUMBER_OF_GAMES * ONE_GAME_HEIGHT + 2) as u16,
-            );
-            let ticket_title = format!(
-                " {} Ticket #{} ",
-                lottery_ticket.lottery_name, ticket_number
-            );
 
-            ticket.show_block_with_title(ticket_dimensions, ticket_title.as_str(), &|terminal| {
-                for game in 0..NUMBER_OF_GAMES {
-                    let vertical_offset = game * ONE_GAME_HEIGHT;
-                    print_field(
-                        &lottery_ticket.main_field,
-                        terminal,
-                        3 + vertical_offset as u16,
-                        12 + left_corner_position as u16,
-                    );
-                    print_field(
-                        &lottery_ticket.separate_number,
-                        terminal,
-                        8 + vertical_offset as u16,
-                        12 + left_corner_position as u16,
-                    );
-                }
-            });
+            for game in 0..NUMBER_OF_GAMES {
+                let vertical_offset = game * ONE_GAME_HEIGHT;
+                print_field(
+                    &lottery_ticket.main_field,
+                    terminal,
+                    3 + vertical_offset as u16,
+                    12 + left_corner_position as u16,
+                );
+                print_field(
+                    &lottery_ticket.separate_number,
+                    terminal,
+                    8 + vertical_offset as u16,
+                    12 + left_corner_position as u16,
+                );
+            }
         }
 
         read().unwrap();

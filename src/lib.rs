@@ -8,7 +8,6 @@ pub mod application {
     mod view;
 
     mod ui_components {
-        pub mod block;
         pub mod screen;
     }
 
