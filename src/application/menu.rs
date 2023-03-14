@@ -115,7 +115,7 @@ impl<'a> Menu<'a> {
 
 impl<'a> Drop for Menu<'a> {
     fn drop(&mut self) {
-        execute!(self.stdout_instance, cursor::Show).unwrap();
+        execute!(self.stdout_instance, Clear(ClearType::All), cursor::Show).unwrap();
 
         disable_raw_mode().unwrap();
     }
