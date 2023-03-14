@@ -5,6 +5,7 @@ pub mod application {
     mod generator;
     mod lotteries;
     mod menu;
+    mod tuimenu;
     mod view;
 
     mod ui_components {
