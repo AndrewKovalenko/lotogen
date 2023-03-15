@@ -50,27 +50,27 @@ fn print_field(
 pub fn show_ticket<'a>(lottery_ticket: &'a LotteryTicket, number_of_tickets: u8) {
     let mut screen = Screen::new().unwrap();
 
-    screen.show(&|terminal| {
-        for ticket_number in 1..=number_of_tickets {
-            let left_corner_position = (ticket_number - 1) * TICKET_WIDTH;
+    // screen.show(&|terminal| {
+    //     for ticket_number in 1..=number_of_tickets {
+    //         let left_corner_position = (ticket_number - 1) * TICKET_WIDTH;
 
-            for game in 0..NUMBER_OF_GAMES {
-                let vertical_offset = game * ONE_GAME_HEIGHT;
-                print_field(
-                    &lottery_ticket.main_field,
-                    terminal,
-                    3 + vertical_offset as u16,
-                    12 + left_corner_position as u16,
-                );
-                print_field(
-                    &lottery_ticket.separate_number,
-                    terminal,
-                    8 + vertical_offset as u16,
-                    12 + left_corner_position as u16,
-                );
-            }
-        }
+    //         for game in 0..NUMBER_OF_GAMES {
+    //             let vertical_offset = game * ONE_GAME_HEIGHT;
+    //             print_field(
+    //                 &lottery_ticket.main_field,
+    //                 terminal,
+    //                 3 + vertical_offset as u16,
+    //                 12 + left_corner_position as u16,
+    //             );
+    //             print_field(
+    //                 &lottery_ticket.separate_number,
+    //                 terminal,
+    //                 8 + vertical_offset as u16,
+    //                 12 + left_corner_position as u16,
+    //             );
+    //         }
+    // }
 
-        read().unwrap();
-    });
+    // read().unwrap();
+    // });
 }

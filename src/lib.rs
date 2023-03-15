@@ -13,22 +13,28 @@ pub mod application {
     }
 
     use generator::{generate_lottery_ticket, LotteryTicket};
-    use menu::MenuEvent;
 
-    use self::view::show_ticket;
+    use self::{
+        tuimenu::{MenuItem, QUIT},
+        ui_components::screen,
+        view::show_ticket,
+    };
 
     pub fn run() {
-        let mut menu = menu::Menu::new();
+        screen::Screen::new().unwrap().show(&|frame| {
+            let mut menu = tuimenu::Menu::new(frame);
 
-        loop {
-            match menu.select() {
-                MenuEvent::MenuItemSelected(lotery) => {
-                    let lottery_ticket: LotteryTicket = generate_lottery_ticket(&lotery);
+            loop {
+                match menu.select() {
+                    MenuItem::Lottery(lotery) => {
+                        let lottery_ticket: LotteryTicket = generate_lottery_ticket(&lotery);
 
-                    show_ticket(&lottery_ticket, 2);
+                        show_ticket(&lottery_ticket, 2);
+                    }
+                    MenuItem::Action(QUIT) => break,
+                    _ => (),
                 }
-                MenuEvent::Shutdown => break,
             }
-        }
+        });
     }
 }
