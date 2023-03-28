@@ -12,29 +12,24 @@ pub mod application {
         pub mod screen;
     }
 
-    use generator::{generate_lottery_ticket, LotteryTicket};
+    use std::io;
 
-    use self::{
-        tuimenu::{MenuItem, QUIT},
-        ui_components::screen,
-        view::show_ticket,
+    use crossterm::{
+        event::{read, DisableMouseCapture},
+        terminal::{disable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
+    };
+    use generator::LotteryTicket;
+    use tui::{
+        backend::CrosstermBackend,
+        layout::Rect,
+        text::{Span, Spans},
+        widgets::Paragraph,
+        Terminal,
     };
 
+    use self::ui_components::screen;
+
     pub fn run() {
-        screen::Screen::new().unwrap().show(&|frame| {
-            let mut menu = tuimenu::Menu::new(frame);
-
-            loop {
-                match menu.select() {
-                    MenuItem::Lottery(lotery) => {
-                        let lottery_ticket: LotteryTicket = generate_lottery_ticket(&lotery);
-
-                        show_ticket(&lottery_ticket, 2);
-                    }
-                    MenuItem::Action(QUIT) => break,
-                    _ => (),
-                }
-            }
-        });
+        let render_result = screen::Screen::new().unwrap().show();
     }
 }
