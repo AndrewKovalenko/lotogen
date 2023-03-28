@@ -30,6 +30,10 @@ pub mod application {
     use self::ui_components::screen;
 
     pub fn run() {
-        let render_result = screen::Screen::new().unwrap().show();
+        let render_result = screen::Screen::new().unwrap().show(&|frame| {
+            let text = vec![Spans::from(vec![Span::raw("First"), Span::raw(".")])];
+            let paragraph = Paragraph::new(text);
+            frame.render_widget(paragraph, frame.size());
+        });
     }
 }
