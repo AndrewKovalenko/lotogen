@@ -1,15 +1,12 @@
 use crossterm::{
-    event::{read, DisableMouseCapture},
+    event::DisableMouseCapture,
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
 use std::io::{self, Stdout};
-use tui::{
-    backend::CrosstermBackend,
-    text::{Span, Spans},
-    widgets::Paragraph,
-    Frame, Terminal,
-};
+use tui::{backend::CrosstermBackend, Frame, Terminal};
+
+type TerminalFrame<'a> = Frame<'a, CrosstermBackend<Stdout>>;
 
 pub struct Screen {
     terminal: Terminal<CrosstermBackend<Stdout>>,
@@ -26,10 +23,7 @@ impl Screen {
         return Ok(Self { terminal });
     }
 
-    pub fn show(
-        &mut self,
-        render: &dyn Fn(&mut Frame<CrosstermBackend<Stdout>>),
-    ) -> Result<(), std::io::Error> {
+    pub fn show(&mut self, render: &dyn Fn(&mut TerminalFrame)) -> Result<(), std::io::Error> {
         self.terminal.draw(|frame| {
             render(frame);
         })?;
@@ -49,15 +43,15 @@ impl Screen {
     }
 }
 
-// impl Drop for Screen {
-//     fn drop(&mut self) {
-//         disable_raw_mode().unwrap();
-//         execute!(
-//             self.terminal.backend_mut(),
-//             LeaveAlternateScreen,
-//             DisableMouseCapture
-//         )
-//         .unwrap();
-//         self.terminal.show_cursor().unwrap();
-//     }
-// }
+impl Drop for Screen {
+    fn drop(&mut self) {
+        disable_raw_mode().unwrap();
+        execute!(
+            self.terminal.backend_mut(),
+            LeaveAlternateScreen,
+            DisableMouseCapture
+        )
+        .unwrap();
+        self.terminal.show_cursor().unwrap();
+    }
+}

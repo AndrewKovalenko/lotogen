@@ -38,6 +38,6 @@ pub mod application {
         });
 
         read().unwrap();
-        screen.restore();
+        // screen.restore();
     }
 }
