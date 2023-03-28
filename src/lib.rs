@@ -5,39 +5,28 @@ pub mod application {
     mod generator;
     mod lotteries;
     mod menu;
-    mod tuimenu;
     mod view;
 
     mod ui_components {
         pub mod screen;
     }
 
-    use std::io;
-
-    use crossterm::{
-        event::{read, DisableMouseCapture},
-        terminal::{disable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
-    };
+    use self::{generator::generate_lottery_ticket, view::show_ticket};
     use generator::LotteryTicket;
-    use tui::{
-        backend::CrosstermBackend,
-        layout::Rect,
-        text::{Span, Spans},
-        widgets::Paragraph,
-        Terminal,
-    };
-
-    use self::ui_components::screen;
+    use menu::{Menu, MenuEvent};
 
     pub fn run() {
-        let mut screen = screen::Screen::new().unwrap();
-        let render_result = screen.show(&|frame| {
-            let text = vec![Spans::from(vec![Span::raw("First"), Span::raw(".")])];
-            let paragraph = Paragraph::new(text);
-            frame.render_widget(paragraph, frame.size());
-        });
+        let mut menu = Menu::new();
+        loop {
+            match menu.select() {
+                MenuEvent::MenuItemSelected(lotery) => {
+                    let lottery_ticket: LotteryTicket = generate_lottery_ticket(&lotery);
 
-        read().unwrap();
-        // screen.restore();
+                    show_ticket(&lottery_ticket, 2);
+                }
+                MenuEvent::Shutdown => break,
+                _ => (),
+            }
+        }
     }
 }

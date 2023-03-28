@@ -18,28 +18,17 @@ impl Screen {
         let mut stdout = io::stdout();
         execute!(stdout, EnterAlternateScreen, DisableMouseCapture)?;
         let backend = CrosstermBackend::new(stdout);
-        let mut terminal = Terminal::new(backend)?;
+        let terminal = Terminal::new(backend)?;
 
         return Ok(Self { terminal });
     }
 
-    pub fn show(&mut self, render: &dyn Fn(&mut TerminalFrame)) -> Result<(), std::io::Error> {
-        self.terminal.draw(|frame| {
-            render(frame);
-        })?;
-
-        Ok(())
-    }
-
-    pub fn restore(&mut self) {
-        disable_raw_mode().unwrap();
-        execute!(
-            self.terminal.backend_mut(),
-            LeaveAlternateScreen,
-            DisableMouseCapture
-        )
-        .unwrap();
-        self.terminal.show_cursor().unwrap();
+    pub fn show(&mut self, render: &dyn Fn(&mut TerminalFrame)) {
+        self.terminal
+            .draw(|frame| {
+                render(frame);
+            })
+            .unwrap();
     }
 }
 
