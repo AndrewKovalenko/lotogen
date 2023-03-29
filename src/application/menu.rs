@@ -7,7 +7,7 @@ use tui::backend::CrosstermBackend;
 use tui::layout::{Alignment, Constraint, Direction, Layout, Rect};
 use tui::style::{Color, Modifier, Style};
 use tui::text::{Span, Spans};
-use tui::widgets::{Block, BorderType, Borders, List, ListItem, ListState, Paragraph, Widget};
+use tui::widgets::{List, ListItem, ListState, Paragraph};
 use tui::Frame;
 
 pub enum MenuEvent<'a> {

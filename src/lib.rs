@@ -1,4 +1,3 @@
-#[macro_use]
 extern crate crossterm;
 
 pub mod application {
@@ -22,10 +21,9 @@ pub mod application {
                 MenuEvent::MenuItemSelected(lotery) => {
                     let lottery_ticket: LotteryTicket = generate_lottery_ticket(&lotery);
 
-                    show_ticket(&lottery_ticket, 2);
+                    show_ticket(&lottery_ticket);
                 }
                 MenuEvent::Shutdown => break,
-                _ => (),
             }
         }
     }
