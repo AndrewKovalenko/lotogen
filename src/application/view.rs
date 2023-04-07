@@ -47,23 +47,23 @@ fn print_field(
     });
 }
 
-pub fn show_ticket<'a>(lottery_ticket: &'a LotteryTicket, number_of_tickets: u8) {
+pub fn show_ticket<'a>(lottery_ticket: &'a Vec<LotteryTicket>, number_of_tickets: usize) {
     let mut screen = Screen::new().unwrap();
 
     screen.show(&|terminal| {
         for ticket_number in 1..=number_of_tickets {
-            let left_corner_position = (ticket_number - 1) * TICKET_WIDTH;
+            let left_corner_position = ((ticket_number - 1) as u8) * TICKET_WIDTH;
 
             for game in 0..NUMBER_OF_GAMES {
                 let vertical_offset = game * ONE_GAME_HEIGHT;
                 print_field(
-                    &lottery_ticket.main_field,
+                    &lottery_ticket[ticket_number - 1].main_field,
                     terminal,
                     3 + vertical_offset as u16,
                     12 + left_corner_position as u16,
                 );
                 print_field(
-                    &lottery_ticket.separate_number,
+                    &lottery_ticket[ticket_number - 1].separate_number,
                     terminal,
                     8 + vertical_offset as u16,
                     12 + left_corner_position as u16,

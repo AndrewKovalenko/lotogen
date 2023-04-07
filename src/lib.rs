@@ -15,6 +15,7 @@ pub mod application {
     use menu::MenuEvent;
 
     use self::view::show_ticket;
+    const NUMBER_OF_TICKETS: usize = 2;
 
     pub fn run() {
         let mut menu = menu::Menu::new();
@@ -22,9 +23,14 @@ pub mod application {
         loop {
             match menu.select() {
                 MenuEvent::MenuItemSelected(lotery) => {
-                    let lottery_ticket: LotteryTicket = generate_lottery_ticket(&lotery);
+                    let mut tickets: Vec<LotteryTicket> = vec![];
 
-                    show_ticket(&lottery_ticket, 2);
+                    for _ in 1..=NUMBER_OF_TICKETS {
+                        let lottery_ticket: LotteryTicket = generate_lottery_ticket(&lotery);
+                        tickets.push(lottery_ticket);
+                    }
+
+                    show_ticket(&tickets, NUMBER_OF_TICKETS);
                 }
                 MenuEvent::Shutdown => break,
             }
