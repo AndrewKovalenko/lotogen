@@ -15,9 +15,8 @@ pub mod application {
     use menu::{Menu, MenuEvent};
 
     pub fn run() {
-        let mut menu = Menu::new();
         loop {
-            match menu.select() {
+            match Menu::new().select() {
                 MenuEvent::MenuItemSelected(lotery) => {
                     let lottery_ticket: LotteryTicket = generate_lottery_ticket(&lotery);
 
