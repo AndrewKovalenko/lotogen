@@ -35,8 +35,6 @@ fn to_table<'a>(numbers: &Vec<i8>) -> Table<'a> {
         .enumerate()
         .fold(Vec::<Vec<Cell>>::new(), add_to_row);
 
-    // let super_numbers =
-
     let table_rows: Vec<Row> = cells
         .iter()
         .map(|row_vector| Row::new(row_vector.clone()))
@@ -61,7 +59,9 @@ pub fn show_ticket<'a>(lottery_ticket: &'a LotteryTicket) {
             )
             .split(frame.size());
 
-        let comumn_width: Vec<Constraint> = (0..20).map(|_| Constraint::Length(2)).collect();
+        let comumn_width: Vec<Constraint> = (0..NUMBERS_PER_ROW)
+            .map(|_| Constraint::Length(2))
+            .collect();
 
         let main_field_numbers = to_table(&lottery_ticket.main_field)
             .style(Style::default().fg(Color::White))

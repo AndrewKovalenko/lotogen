@@ -19,7 +19,7 @@ pub struct LotteryTicket {
 
 fn get_generator_settings(lottery: &Lottery) -> GeneratorSettingsForLottery {
     match lottery {
-        Lottery::MegaMillions(_) => GeneratorSettingsForLottery {
+        Lottery::PowerBall(_) => GeneratorSettingsForLottery {
             main_field_min_number: 1,
             main_field_max_number: 69,
             wining_numbers_count: 5,
@@ -27,7 +27,7 @@ fn get_generator_settings(lottery: &Lottery) -> GeneratorSettingsForLottery {
             separate_number_min: 1,
             separate_number_max: 26,
         },
-        Lottery::PowerBall(_) => GeneratorSettingsForLottery {
+        Lottery::MegaMillions(_) => GeneratorSettingsForLottery {
             main_field_min_number: 1,
             main_field_max_number: 70,
             wining_numbers_count: 5,
