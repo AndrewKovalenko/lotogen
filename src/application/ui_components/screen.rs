@@ -6,7 +6,7 @@ use crossterm::{
 use std::io::{self, Stdout};
 use tui::{backend::CrosstermBackend, Frame, Terminal};
 
-type TerminalFrame<'a> = Frame<'a, CrosstermBackend<Stdout>>;
+pub type TerminalFrame<'a> = Frame<'a, CrosstermBackend<Stdout>>;
 
 pub struct Screen {
     terminal: Terminal<CrosstermBackend<Stdout>>,

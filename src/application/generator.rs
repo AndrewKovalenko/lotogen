@@ -91,8 +91,6 @@ pub fn generate_lottery_ticket(lottery: &Lottery) -> Ticket {
                 1,
             );
 
-            let lottery_name = get_lottery_name(lottery).to_owned();
-
             return Game {
                 main_field: main_field_numbers,
                 separate_number: separate_number_field,
