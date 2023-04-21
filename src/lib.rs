@@ -11,14 +11,14 @@ pub mod application {
     }
 
     use self::{generator::generate_lottery_ticket, tickets_view::show_ticket};
-    use generator::LotteryTicket;
+    use generator::Ticket;
     use menu::{Menu, MenuEvent};
 
     pub fn run() {
         loop {
             match Menu::new().select() {
                 MenuEvent::MenuItemSelected(lotery) => {
-                    let lottery_ticket: LotteryTicket = generate_lottery_ticket(&lotery);
+                    let lottery_ticket: Ticket = generate_lottery_ticket(&lotery);
 
                     show_ticket(&lottery_ticket);
                 }

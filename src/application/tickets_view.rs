@@ -1,17 +1,22 @@
+use super::generator::GAMES_PER_TICKET;
 use super::ui_components::screen::Screen;
-use super::LotteryTicket;
+use super::Ticket;
 
 use crossterm::event::read;
 use tui::layout::{Constraint, Direction, Layout};
-use tui::style::{Color, Style};
+use tui::style::{Color, Modifier, Style};
 use tui::widgets::{Block, Cell, Row, Table};
 
 const NUMBERS_PER_ROW: usize = 20;
 const COLUMN_SPACING: u16 = 2;
+const MAIN_FIELD_HEIGHT: u16 = 5;
+const SPECIAL_FIELD_HEIGHT: u16 = 2;
 
 fn add_to_row<'a>(mut rows: Vec<Vec<Cell<'a>>>, (i, n): (usize, &i8)) -> Vec<Vec<Cell<'a>>> {
     let style = if *n < 0 {
-        Style::default().fg(tui::style::Color::Green)
+        Style::default()
+            .fg(tui::style::Color::Green)
+            .add_modifier(Modifier::BOLD)
     } else {
         Style::default().fg(tui::style::Color::Gray)
     };
@@ -43,41 +48,53 @@ fn to_table<'a>(numbers: &Vec<i8>) -> Table<'a> {
     Table::new(table_rows).block(Block::default())
 }
 
-pub fn show_ticket<'a>(lottery_ticket: &'a LotteryTicket) {
+fn get_games_layout(number_of_games: usize) -> Layout {
+    let game_sections: Vec<Constraint> = (0..number_of_games)
+        .map(|_| Constraint::Length(9))
+        .collect();
+
+    Layout::default()
+        .direction(Direction::Vertical)
+        .constraints(game_sections)
+}
+
+pub fn show_ticket<'a>(lottery_ticket: &'a Ticket) {
     let mut screen = Screen::new().unwrap();
 
     screen.show(&|frame| {
-        let ticket_layout_sections = Layout::default()
-            .direction(Direction::Vertical)
-            .constraints(
-                [
-                    Constraint::Length(3),
-                    Constraint::Length(7),
-                    Constraint::Length(2),
-                ]
-                .as_ref(),
-            )
-            .split(frame.size());
+        let games_sections = get_games_layout(GAMES_PER_TICKET).split(frame.size());
 
-        let comumn_width: Vec<Constraint> = (0..NUMBERS_PER_ROW)
-            .map(|_| Constraint::Length(2))
-            .collect();
+        for game_number in 0..GAMES_PER_TICKET {
+            let current_game_section = games_sections[game_number];
+            let game_fields = Layout::default()
+                .direction(Direction::Vertical)
+                .constraints(
+                    [
+                        Constraint::Length(MAIN_FIELD_HEIGHT),
+                        Constraint::Length(SPECIAL_FIELD_HEIGHT),
+                    ]
+                    .as_ref(),
+                )
+                .split(current_game_section);
 
-        let main_field_numbers = to_table(&lottery_ticket.main_field)
-            .style(Style::default().fg(Color::White))
-            .block(Block::default().title("Primary numbers"))
-            .widths(&comumn_width)
-            .column_spacing(COLUMN_SPACING);
+            let comumn_width: Vec<Constraint> = (0..NUMBERS_PER_ROW)
+                .map(|_| Constraint::Length(2))
+                .collect();
 
-        frame.render_widget(main_field_numbers, ticket_layout_sections[1]);
+            let main_field_numbers = to_table(&lottery_ticket.games[game_number].main_field)
+                .style(Style::default().fg(Color::White))
+                .widths(&comumn_width)
+                .column_spacing(COLUMN_SPACING);
 
-        let super_numbers = to_table(&lottery_ticket.separate_number)
-            .style(Style::default().fg(Color::White))
-            .block(Block::default().title("Special number"))
-            .widths(&comumn_width)
-            .column_spacing(COLUMN_SPACING);
+            frame.render_widget(main_field_numbers, game_fields[0]);
 
-        frame.render_widget(super_numbers, ticket_layout_sections[2]);
+            let super_numbers = to_table(&lottery_ticket.games[game_number].separate_number)
+                .style(Style::default().fg(Color::White))
+                .widths(&comumn_width)
+                .column_spacing(COLUMN_SPACING);
+
+            frame.render_widget(super_numbers, game_fields[1]);
+        }
     });
     read().unwrap();
 }
