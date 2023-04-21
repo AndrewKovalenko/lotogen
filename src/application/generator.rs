@@ -2,6 +2,8 @@ use rand::Rng;
 
 use super::lotteries::{Lottery, Namable};
 
+pub const GAMES_PER_TICKET: usize = 5;
+
 struct GeneratorSettingsForLottery {
     main_field_min_number: u8,
     main_field_max_number: u8,
@@ -11,15 +13,19 @@ struct GeneratorSettingsForLottery {
     separate_number_max: u8,
 }
 
-pub struct LotteryTicket {
-    pub lottery_name: String,
+pub struct Game {
     pub main_field: Vec<i8>,
     pub separate_number: Vec<i8>,
 }
 
+pub struct Ticket {
+    pub lottery_name: String,
+    pub games: Vec<Game>,
+}
+
 fn get_generator_settings(lottery: &Lottery) -> GeneratorSettingsForLottery {
     match lottery {
-        Lottery::MegaMillions(_) => GeneratorSettingsForLottery {
+        Lottery::PowerBall(_) => GeneratorSettingsForLottery {
             main_field_min_number: 1,
             main_field_max_number: 69,
             wining_numbers_count: 5,
@@ -27,7 +33,7 @@ fn get_generator_settings(lottery: &Lottery) -> GeneratorSettingsForLottery {
             separate_number_min: 1,
             separate_number_max: 26,
         },
-        Lottery::PowerBall(_) => GeneratorSettingsForLottery {
+        Lottery::MegaMillions(_) => GeneratorSettingsForLottery {
             main_field_min_number: 1,
             main_field_max_number: 70,
             wining_numbers_count: 5,
@@ -68,26 +74,32 @@ where
     return lottery.get_name();
 }
 
-pub fn generate_lottery_ticket(lottery: &Lottery) -> LotteryTicket {
-    let generator_settings = get_generator_settings(lottery);
+pub fn generate_lottery_ticket(lottery: &Lottery) -> Ticket {
+    let games: Vec<Game> = (0..GAMES_PER_TICKET)
+        .map(|_| {
+            let generator_settings = get_generator_settings(lottery);
 
-    let main_field_numbers = generate_ticket_field(
-        generator_settings.main_field_min_number,
-        generator_settings.main_field_max_number,
-        generator_settings.wining_numbers_count,
-    );
+            let main_field_numbers = generate_ticket_field(
+                generator_settings.main_field_min_number,
+                generator_settings.main_field_max_number,
+                generator_settings.wining_numbers_count,
+            );
 
-    let separate_number_field = generate_ticket_field(
-        generator_settings.separate_number_min,
-        generator_settings.separate_number_max,
-        1,
-    );
+            let separate_number_field = generate_ticket_field(
+                generator_settings.separate_number_min,
+                generator_settings.separate_number_max,
+                1,
+            );
 
-    let lottery_name = get_lottery_name(lottery).to_owned();
+            return Game {
+                main_field: main_field_numbers,
+                separate_number: separate_number_field,
+            };
+        })
+        .collect();
 
-    return LotteryTicket {
-        lottery_name: lottery_name,
-        main_field: main_field_numbers,
-        separate_number: separate_number_field,
-    };
+    Ticket {
+        lottery_name: get_lottery_name(lottery).to_owned(),
+        games,
+    }
 }

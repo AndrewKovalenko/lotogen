@@ -4,7 +4,9 @@ use crossterm::{
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
 use std::io::{self, Stdout};
-use tui::{backend::CrosstermBackend, Terminal};
+use tui::{backend::CrosstermBackend, Frame, Terminal};
+
+pub type TerminalFrame<'a> = Frame<'a, CrosstermBackend<Stdout>>;
 
 pub struct Screen {
     terminal: Terminal<CrosstermBackend<Stdout>>,
@@ -21,8 +23,12 @@ impl Screen {
         return Ok(Self { terminal });
     }
 
-    pub fn show(&mut self, render: &dyn Fn(&mut Terminal<CrosstermBackend<Stdout>>)) {
-        render(&mut self.terminal);
+    pub fn show(&mut self, render: &dyn Fn(&mut TerminalFrame)) {
+        self.terminal
+            .draw(|frame| {
+                render(frame);
+            })
+            .unwrap();
     }
 }
 

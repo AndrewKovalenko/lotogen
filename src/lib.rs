@@ -1,40 +1,30 @@
-#[macro_use]
 extern crate crossterm;
 
 pub mod application {
     mod generator;
     mod lotteries;
     mod menu;
-    mod view;
+    mod tickets_view;
 
     mod ui_components {
         pub mod screen;
     }
 
-    use generator::{generate_lottery_ticket, LotteryTicket};
-    use menu::MenuEvent;
+    use self::{generator::generate_lottery_ticket, tickets_view::show_results};
+    use generator::Ticket;
+    use menu::{Menu, MenuEvent};
 
-    use self::view::show_ticket;
-    const NUMBER_OF_TICKETS: usize = 2;
-    const NUMBER_OF_GAMES: usize = 5;
+    const TICKETS_PER_SCREEN: usize = 2;
 
     pub fn run() {
-        let mut menu = menu::Menu::new();
-
         loop {
-            match menu.select() {
+            match Menu::new().select() {
                 MenuEvent::MenuItemSelected(lotery) => {
-                    let mut tickets: Vec<Vec<LotteryTicket>> = vec![];
+                    let tickets: Vec<Ticket> = (0..TICKETS_PER_SCREEN)
+                        .map(|_| generate_lottery_ticket(&lotery))
+                        .collect();
 
-                    for i in 1..=NUMBER_OF_TICKETS {
-                        tickets.push(Vec::new());
-                        for _ in 1..=NUMBER_OF_GAMES {
-                            let game: LotteryTicket = generate_lottery_ticket(&lotery);
-                            tickets[i - 1].push(game);
-                        }
-                    }
-
-                    show_ticket(&tickets, NUMBER_OF_TICKETS);
+                    show_results(&tickets);
                 }
                 MenuEvent::Shutdown => break,
             }
