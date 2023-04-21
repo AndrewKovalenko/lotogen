@@ -1,47 +1,18 @@
 use rand::Rng;
 
-use super::lotteries::{Lottery, Namable};
+use super::lotteries::Lottery;
+use super::settings::get_lottery_settings;
 
 pub const GAMES_PER_TICKET: usize = 5;
-
-struct GeneratorSettingsForLottery {
-    main_field_min_number: u8,
-    main_field_max_number: u8,
-
-    wining_numbers_count: u8,
-    separate_number_min: u8,
-    separate_number_max: u8,
-}
 
 pub struct Game {
     pub main_field: Vec<i8>,
     pub separate_number: Vec<i8>,
 }
 
-pub struct Ticket {
-    pub lottery_name: String,
+pub struct Ticket<'a> {
+    pub lottery: Lottery<'a>,
     pub games: Vec<Game>,
-}
-
-fn get_generator_settings(lottery: &Lottery) -> GeneratorSettingsForLottery {
-    match lottery {
-        Lottery::PowerBall(_) => GeneratorSettingsForLottery {
-            main_field_min_number: 1,
-            main_field_max_number: 69,
-            wining_numbers_count: 5,
-
-            separate_number_min: 1,
-            separate_number_max: 26,
-        },
-        Lottery::MegaMillions(_) => GeneratorSettingsForLottery {
-            main_field_min_number: 1,
-            main_field_max_number: 70,
-            wining_numbers_count: 5,
-
-            separate_number_min: 1,
-            separate_number_max: 25,
-        },
-    }
 }
 
 fn generate_ticket_field(range_min: u8, rannge_max: u8, count: u8) -> Vec<i8> {
@@ -67,17 +38,10 @@ fn generate_ticket_field(range_min: u8, rannge_max: u8, count: u8) -> Vec<i8> {
     return main_field_numbers;
 }
 
-fn get_lottery_name<'a, T>(lottery: &'a T) -> &'a str
-where
-    T: Namable,
-{
-    return lottery.get_name();
-}
-
-pub fn generate_lottery_ticket(lottery: &Lottery) -> Ticket {
+pub fn generate_lottery_ticket<'a>(lottery: &'a Lottery) -> Ticket<'a> {
     let games: Vec<Game> = (0..GAMES_PER_TICKET)
         .map(|_| {
-            let generator_settings = get_generator_settings(lottery);
+            let generator_settings = get_lottery_settings(lottery);
 
             let main_field_numbers = generate_ticket_field(
                 generator_settings.main_field_min_number,
@@ -99,7 +63,7 @@ pub fn generate_lottery_ticket(lottery: &Lottery) -> Ticket {
         .collect();
 
     Ticket {
-        lottery_name: get_lottery_name(lottery).to_owned(),
+        lottery: *lottery,
         games,
     }
 }

@@ -1,4 +1,6 @@
 use super::generator::GAMES_PER_TICKET;
+use super::lotteries::Lottery;
+use super::settings::get_lottery_settings;
 use super::ui_components::screen::{Screen, TerminalFrame};
 use super::Ticket;
 
@@ -7,11 +9,11 @@ use tui::layout::{Constraint, Direction, Layout, Rect};
 use tui::style::{Color, Modifier, Style};
 use tui::widgets::{Block, Cell, Row, Table};
 
-const NUMBERS_PER_ROW: usize = 20;
+const NUMBERS_PER_ROW: usize = 12;
 const COLUMN_SPACING: u16 = 2;
-const MAIN_FIELD_HEIGHT: u16 = 5;
-const SPECIAL_FIELD_HEIGHT: u16 = 2;
-const TICKET_MARGIN: u16 = 3;
+const MAIN_FIELD_HEIGHT: u16 = 7;
+const SPECIAL_FIELD_HEIGHT: u16 = 3;
+const BLANK_CELL_NUMBER: i8 = -127;
 
 fn add_to_row<'a>(mut rows: Vec<Vec<Cell<'a>>>, (i, n): (usize, &i8)) -> Vec<Vec<Cell<'a>>> {
     let style = if *n < 0 {
@@ -22,7 +24,11 @@ fn add_to_row<'a>(mut rows: Vec<Vec<Cell<'a>>>, (i, n): (usize, &i8)) -> Vec<Vec
         Style::default().fg(tui::style::Color::Gray)
     };
 
-    let cell = Cell::from(n.abs().to_string()).style(style);
+    let cell = if *n == BLANK_CELL_NUMBER {
+        Cell::from("")
+    } else {
+        Cell::from(n.abs().to_string()).style(style)
+    };
 
     if rows.len() == 0 || i % NUMBERS_PER_ROW == 0 {
         let new_row = vec![cell];
@@ -35,8 +41,12 @@ fn add_to_row<'a>(mut rows: Vec<Vec<Cell<'a>>>, (i, n): (usize, &i8)) -> Vec<Vec
     return rows;
 }
 
-fn to_table<'a>(numbers: &Vec<i8>) -> Table<'a> {
-    let cells = numbers
+fn to_table<'a>(numbers: &Vec<i8>, lottery: &'a Lottery) -> Table<'a> {
+    let settings = get_lottery_settings(lottery);
+    let mut formatting_cells = vec![BLANK_CELL_NUMBER; settings.main_field_offset];
+    formatting_cells.extend(numbers);
+
+    let cells = formatting_cells
         .iter()
         .enumerate()
         .fold(Vec::<Vec<Cell>>::new(), add_to_row);
@@ -51,7 +61,7 @@ fn to_table<'a>(numbers: &Vec<i8>) -> Table<'a> {
 
 fn get_games_layout(number_of_games: usize) -> Layout {
     let game_sections: Vec<Constraint> = (0..number_of_games)
-        .map(|_| Constraint::Length(9))
+        .map(|_| Constraint::Length(11))
         .collect();
 
     Layout::default()
@@ -79,17 +89,23 @@ fn show_ticket<'a>(lottery_ticket: &Ticket, frame: &mut TerminalFrame<'a>, secti
             .map(|_| Constraint::Length(2))
             .collect();
 
-        let main_field_numbers = to_table(&lottery_ticket.games[game_number].main_field)
-            .style(Style::default().fg(Color::White))
-            .widths(&comumn_width)
-            .column_spacing(COLUMN_SPACING);
+        let main_field_numbers = to_table(
+            &lottery_ticket.games[game_number].main_field,
+            &lottery_ticket.lottery,
+        )
+        .style(Style::default().fg(Color::White))
+        .widths(&comumn_width)
+        .column_spacing(COLUMN_SPACING);
 
         frame.render_widget(main_field_numbers, game_fields[0]);
 
-        let super_numbers = to_table(&lottery_ticket.games[game_number].separate_number)
-            .style(Style::default().fg(Color::White))
-            .widths(&comumn_width)
-            .column_spacing(COLUMN_SPACING);
+        let super_numbers = to_table(
+            &lottery_ticket.games[game_number].separate_number,
+            &lottery_ticket.lottery,
+        )
+        .style(Style::default().fg(Color::White))
+        .widths(&comumn_width)
+        .column_spacing(COLUMN_SPACING);
 
         frame.render_widget(super_numbers, game_fields[1]);
     }
@@ -100,15 +116,21 @@ pub fn show_results<'a>(tickets: &'a Vec<Ticket>) {
     screen.show(&|frame| {
         let results_layout = Layout::default()
             .direction(Direction::Horizontal)
-            .margin(TICKET_MARGIN)
-            .constraints([Constraint::Percentage(40), Constraint::Percentage(40)].as_ref())
+            .constraints(
+                [
+                    Constraint::Percentage(20),
+                    Constraint::Percentage(40),
+                    Constraint::Percentage(40),
+                ]
+                .as_ref(),
+            )
             .split(frame.size());
 
         for ticket_number in 0..tickets.len() {
             show_ticket(
                 &tickets[ticket_number],
                 frame,
-                &results_layout[ticket_number],
+                &results_layout[ticket_number + 1],
             );
         }
     });

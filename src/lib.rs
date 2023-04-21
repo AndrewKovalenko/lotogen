@@ -4,6 +4,7 @@ pub mod application {
     mod generator;
     mod lotteries;
     mod menu;
+    mod settings;
     mod tickets_view;
 
     mod ui_components {
