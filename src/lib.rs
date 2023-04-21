@@ -4,13 +4,13 @@ pub mod application {
     mod generator;
     mod lotteries;
     mod menu;
-    mod view;
+    mod tickets_view;
 
     mod ui_components {
         pub mod screen;
     }
 
-    use self::{generator::generate_lottery_ticket, view::show_ticket};
+    use self::{generator::generate_lottery_ticket, tickets_view::show_ticket};
     use generator::LotteryTicket;
     use menu::{Menu, MenuEvent};
 
