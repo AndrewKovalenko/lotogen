@@ -20,7 +20,7 @@ fn add_to_row<'a>(mut rows: Vec<Vec<Cell<'a>>>, (i, n): (usize, &i8)) -> Vec<Vec
             .fg(tui::style::Color::Green)
             .add_modifier(Modifier::BOLD)
     } else {
-        Style::default().fg(tui::style::Color::Gray)
+        Style::default().fg(tui::style::Color::DarkGray)
     };
 
     let cell = if *n == BLANK_CELL_NUMBER {
