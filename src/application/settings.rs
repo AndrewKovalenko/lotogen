@@ -8,6 +8,7 @@ pub struct LotterySettings {
     pub wining_numbers_count: u8,
     pub separate_number_min: u8,
     pub separate_number_max: u8,
+    pub separate_number_offset: usize,
 }
 
 pub fn get_lottery_settings(lottery: &Lottery) -> LotterySettings {
@@ -20,6 +21,7 @@ pub fn get_lottery_settings(lottery: &Lottery) -> LotterySettings {
 
             separate_number_min: 1,
             separate_number_max: 26,
+            separate_number_offset: 2,
         },
         Lottery::MegaMillions(_) => LotterySettings {
             main_field_min_number: 1,
@@ -29,6 +31,7 @@ pub fn get_lottery_settings(lottery: &Lottery) -> LotterySettings {
 
             separate_number_min: 1,
             separate_number_max: 25,
+            separate_number_offset: 2,
         },
     }
 }

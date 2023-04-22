@@ -1,5 +1,4 @@
 use super::generator::GAMES_PER_TICKET;
-use super::lotteries::Lottery;
 use super::settings::get_lottery_settings;
 use super::ui_components::screen::{Screen, TerminalFrame};
 use super::Ticket;
@@ -7,7 +6,7 @@ use super::Ticket;
 use crossterm::event::read;
 use tui::layout::{Constraint, Direction, Layout, Rect};
 use tui::style::{Color, Modifier, Style};
-use tui::widgets::{Block, Cell, Row, Table};
+use tui::widgets::{Block, Borders, Cell, Row, Table};
 
 const NUMBERS_PER_ROW: usize = 12;
 const COLUMN_SPACING: u16 = 2;
@@ -41,9 +40,8 @@ fn add_to_row<'a>(mut rows: Vec<Vec<Cell<'a>>>, (i, n): (usize, &i8)) -> Vec<Vec
     return rows;
 }
 
-fn to_table<'a>(numbers: &Vec<i8>, lottery: &'a Lottery) -> Table<'a> {
-    let settings = get_lottery_settings(lottery);
-    let mut formatting_cells = vec![BLANK_CELL_NUMBER; settings.main_field_offset];
+fn to_table<'a>(numbers: &Vec<i8>, offset: usize) -> Table<'a> {
+    let mut formatting_cells = vec![BLANK_CELL_NUMBER; offset];
     formatting_cells.extend(numbers);
 
     let cells = formatting_cells
@@ -56,7 +54,7 @@ fn to_table<'a>(numbers: &Vec<i8>, lottery: &'a Lottery) -> Table<'a> {
         .map(|row_vector| Row::new(row_vector.clone()))
         .collect();
 
-    Table::new(table_rows).block(Block::default())
+    Table::new(table_rows)
 }
 
 fn get_games_layout(number_of_games: usize) -> Layout {
@@ -71,6 +69,7 @@ fn get_games_layout(number_of_games: usize) -> Layout {
 
 fn show_ticket<'a>(lottery_ticket: &Ticket, frame: &mut TerminalFrame<'a>, section: &Rect) {
     let games_sections = get_games_layout(GAMES_PER_TICKET).split(*section);
+    let settings = get_lottery_settings(&lottery_ticket.lottery);
 
     for game_number in 0..GAMES_PER_TICKET {
         let current_game_section = games_sections[game_number];
@@ -91,7 +90,7 @@ fn show_ticket<'a>(lottery_ticket: &Ticket, frame: &mut TerminalFrame<'a>, secti
 
         let main_field_numbers = to_table(
             &lottery_ticket.games[game_number].main_field,
-            &lottery_ticket.lottery,
+            settings.main_field_offset,
         )
         .style(Style::default().fg(Color::White))
         .widths(&comumn_width)
@@ -99,13 +98,20 @@ fn show_ticket<'a>(lottery_ticket: &Ticket, frame: &mut TerminalFrame<'a>, secti
 
         frame.render_widget(main_field_numbers, game_fields[0]);
 
+        let underline = if game_number != GAMES_PER_TICKET - 1 {
+            Block::default().borders(Borders::BOTTOM)
+        } else {
+            Block::default()
+        };
+
         let super_numbers = to_table(
             &lottery_ticket.games[game_number].separate_number,
-            &lottery_ticket.lottery,
+            settings.separate_number_offset,
         )
         .style(Style::default().fg(Color::White))
         .widths(&comumn_width)
-        .column_spacing(COLUMN_SPACING);
+        .column_spacing(COLUMN_SPACING)
+        .block(underline);
 
         frame.render_widget(super_numbers, game_fields[1]);
     }
@@ -118,9 +124,11 @@ pub fn show_results<'a>(tickets: &'a Vec<Ticket>) {
             .direction(Direction::Horizontal)
             .constraints(
                 [
-                    Constraint::Percentage(20),
-                    Constraint::Percentage(40),
-                    Constraint::Percentage(40),
+                    Constraint::Percentage(25),
+                    Constraint::Length(46),
+                    Constraint::Percentage(10),
+                    Constraint::Length(46),
+                    Constraint::Percentage(25),
                 ]
                 .as_ref(),
             )
@@ -130,7 +138,7 @@ pub fn show_results<'a>(tickets: &'a Vec<Ticket>) {
             show_ticket(
                 &tickets[ticket_number],
                 frame,
-                &results_layout[ticket_number + 1],
+                &results_layout[ticket_number * 2 + 1],
             );
         }
     });
