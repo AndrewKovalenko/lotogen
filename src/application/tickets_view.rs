@@ -8,11 +8,12 @@ use tui::layout::{Constraint, Direction, Layout, Rect};
 use tui::style::{Color, Modifier, Style};
 use tui::widgets::{Block, Borders, Cell, Row, Table};
 
-const NUMBERS_PER_ROW: usize = 12;
+const NUMBERS_PER_ROW: usize = 16;
 const COLUMN_SPACING: u16 = 2;
-const MAIN_FIELD_HEIGHT: u16 = 7;
-const SPECIAL_FIELD_HEIGHT: u16 = 3;
+const MAIN_FIELD_HEIGHT: u16 = 6;
+const SPECIAL_FIELD_HEIGHT: u16 = 2;
 const BLANK_CELL_NUMBER: i8 = -127;
+const TICKET_WIDTH: u16 = 62;
 
 fn add_to_row<'a>(mut rows: Vec<Vec<Cell<'a>>>, (i, n): (usize, &i8)) -> Vec<Vec<Cell<'a>>> {
     let style = if *n < 0 {
@@ -59,7 +60,7 @@ fn to_table<'a>(numbers: &Vec<i8>, offset: usize) -> Table<'a> {
 
 fn get_games_layout(number_of_games: usize) -> Layout {
     let game_sections: Vec<Constraint> = (0..number_of_games)
-        .map(|_| Constraint::Length(11))
+        .map(|_| Constraint::Length(10))
         .collect();
 
     Layout::default()
@@ -124,11 +125,11 @@ pub fn show_results<'a>(tickets: &'a Vec<Ticket>) {
             .direction(Direction::Horizontal)
             .constraints(
                 [
-                    Constraint::Percentage(25),
-                    Constraint::Length(46),
+                    Constraint::Percentage(15),
+                    Constraint::Length(TICKET_WIDTH),
                     Constraint::Percentage(10),
-                    Constraint::Length(46),
-                    Constraint::Percentage(25),
+                    Constraint::Length(TICKET_WIDTH),
+                    Constraint::Percentage(15),
                 ]
                 .as_ref(),
             )
