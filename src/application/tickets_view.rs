@@ -48,11 +48,14 @@ fn to_table<'a>(numbers: &Vec<i8>, offset: usize, offset_rows: usize) -> Table<'
     let mut cell_values = Vec::new();
 
     for row in 0..offset_rows {
-        let row_numbers: &[i8] = &numbers
-            [row * items_per_offset_row..row * items_per_offset_row + items_per_offset_row + 1];
+        let row_numbers: &[i8] =
+            &numbers[row * items_per_offset_row..row * items_per_offset_row + items_per_offset_row];
         cell_values.extend(formatting_cells.clone());
         cell_values.extend(row_numbers);
     }
+
+    let numbers_left = &numbers[offset_rows * items_per_offset_row..];
+    cell_values.extend(numbers_left);
 
     let cells = cell_values
         .iter()
