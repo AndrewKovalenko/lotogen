@@ -14,6 +14,7 @@ const MAIN_FIELD_HEIGHT: u16 = 6;
 const SPECIAL_FIELD_HEIGHT: u16 = 2;
 const BLANK_CELL_NUMBER: i8 = -127;
 const TICKET_WIDTH: u16 = 62;
+const ONE: usize = 1;
 
 fn add_to_row<'a>(mut rows: Vec<Vec<Cell<'a>>>, (i, n): (usize, &i8)) -> Vec<Vec<Cell<'a>>> {
     let style = if *n < 0 {
@@ -41,11 +42,19 @@ fn add_to_row<'a>(mut rows: Vec<Vec<Cell<'a>>>, (i, n): (usize, &i8)) -> Vec<Vec
     return rows;
 }
 
-fn to_table<'a>(numbers: &Vec<i8>, offset: usize) -> Table<'a> {
-    let mut formatting_cells = vec![BLANK_CELL_NUMBER; offset];
-    formatting_cells.extend(numbers);
+fn to_table<'a>(numbers: &Vec<i8>, offset: usize, offset_rows: usize) -> Table<'a> {
+    let formatting_cells = vec![BLANK_CELL_NUMBER; offset];
+    let items_per_offset_row = NUMBERS_PER_ROW - offset;
+    let mut cell_values = Vec::new();
 
-    let cells = formatting_cells
+    for row in 0..offset_rows {
+        let row_numbers: &[i8] = &numbers
+            [row * items_per_offset_row..row * items_per_offset_row + items_per_offset_row + 1];
+        cell_values.extend(formatting_cells.clone());
+        cell_values.extend(row_numbers);
+    }
+
+    let cells = cell_values
         .iter()
         .enumerate()
         .fold(Vec::<Vec<Cell>>::new(), add_to_row);
@@ -85,16 +94,17 @@ fn show_ticket<'a>(lottery_ticket: &Ticket, frame: &mut TerminalFrame<'a>, secti
             )
             .split(current_game_section);
 
-        let comumn_width: Vec<Constraint> = (0..NUMBERS_PER_ROW)
+        let column_width: Vec<Constraint> = (0..NUMBERS_PER_ROW)
             .map(|_| Constraint::Length(2))
             .collect();
 
         let main_field_numbers = to_table(
             &lottery_ticket.games[game_number].main_field,
             settings.main_field_offset,
+            settings.main_field_offset_rows,
         )
         .style(Style::default().fg(Color::White))
-        .widths(&comumn_width)
+        .widths(&column_width)
         .column_spacing(COLUMN_SPACING);
 
         frame.render_widget(main_field_numbers, game_fields[0]);
@@ -108,9 +118,10 @@ fn show_ticket<'a>(lottery_ticket: &Ticket, frame: &mut TerminalFrame<'a>, secti
         let super_numbers = to_table(
             &lottery_ticket.games[game_number].separate_number,
             settings.separate_number_offset,
+            ONE,
         )
         .style(Style::default().fg(Color::White))
-        .widths(&comumn_width)
+        .widths(&column_width)
         .column_spacing(COLUMN_SPACING)
         .block(underline);
 
